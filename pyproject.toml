@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aaaas"
+version = "0.1.0"
+description = "AAAAS — AI Agent as a Service: autonomous bookkeeping agent backed by Odoo"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "AAAAS" }]
+keywords = ["ai", "agent", "odoo", "erp", "bookkeeping", "accounting"]
+
+# Core has NO required third-party dependencies — it runs on the stdlib.
+dependencies = []
+
+[project.optional-dependencies]
+llm = ["anthropic>=0.40"]
+dashboard = ["fastapi>=0.110", "uvicorn>=0.29"]
+dev = ["pytest>=7.4", "httpx>=0.27"]
+
+[project.scripts]
+aaaas-demo = "aaaas.cli:main"
+aaaas-dashboard = "aaaas.dashboard.web:run"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

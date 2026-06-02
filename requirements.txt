@@ -1,0 +1,11 @@
+# AAAAS core runtime dependencies.
+#
+# The core package (config, odoo tool layer with in-memory backend,
+# financial logic, confidence policy, HITL, memory, scheduler, and the
+# agent ReAct loop with a fake LLM) runs on the Python STANDARD LIBRARY
+# ALONE. You can run the demos and the full test suite with zero installs.
+#
+# The only optional runtime dependency is the Claude SDK, needed solely to
+# drive the agent with a real LLM (AnthropicLLM). Everything else is stdlib.
+
+anthropic>=0.40 ; extra == "llm"
