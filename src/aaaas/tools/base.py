@@ -16,7 +16,7 @@ from typing import Any, Callable
 from ..agent.confidence import Decision, decide, is_hard_hitl
 from ..agent.personality import Personality
 from ..config import Settings
-from ..hitl.interface import HITLChannel, HITLRequest
+from ..hitl.interface import HITLChannel, HITLRequest, HITLStatus
 from ..memory.store import PatternMemory
 from ..odoo.client import OdooClient
 
@@ -142,6 +142,20 @@ def apply_policy(
                 confidence=confidence,
                 decision=decision,
                 data={"hitl": verdict.status.value, **payload, **extra},
+            )
+        # Async approval: if the channel can defer (e.g. a dashboard/Slack
+        # queue), hand it the prepared action to run on later approval. The
+        # action does NOT execute now — it waits for a human.
+        if verdict.status == HITLStatus.EXPIRED and hasattr(ctx.hitl, "defer"):
+            ctx.hitl.defer(req, do_action)
+            ctx.notices.append(f"[PENDING APPROVAL] {action}: {summary}")
+            return ToolResult(
+                ok=False,
+                action=action,
+                message=f"Queued for human approval. {summary}",
+                confidence=confidence,
+                decision=decision,
+                data={"hitl": "pending", **payload},
             )
         ctx.notices.append(f"[AWAITING HUMAN] {action}: {summary}")
         return ToolResult(

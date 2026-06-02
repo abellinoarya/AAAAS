@@ -24,8 +24,12 @@ python -m aaaas.cli --personality genz   # toggle the personality layer
 # 2. Watch the agent's ReAct loop drive the tools
 python examples/demo_agent_react.py
 
-# 3. Run the test suite (only needs pytest)
-pip install pytest
+# 3. Launch the admin dashboard (approval queue + ROI metrics)
+pip install -e ".[dashboard]"
+aaaas-dashboard                          # http://127.0.0.1:8000
+
+# 4. Run the test suite
+pip install -e ".[dev,dashboard]"
 python -m pytest
 ```
 
@@ -50,6 +54,29 @@ The demo (`python -m aaaas.cli`) walks the whole loop:
 | Daily summary | collects everything needing a human | digest |
 
 Every action is written to the Odoo **chatter** as an audit note.
+
+## Admin dashboard
+
+`aaaas-dashboard` serves a single-page admin UI (FastAPI) showing:
+
+- **ROI metrics** — transactions processed, hours saved, automation rate
+- **Approval queue** — actions the agent prepared but that need a human
+  (over-tolerance matches, bill postings); **Approve** executes the prepared
+  action in Odoo, **Reject** discards it — the async "prepare now, decide later"
+  pattern a real finance team needs
+- **Activity feed** — every tool call with its confidence and escalation decision
+
+The dashboard is a thin veneer over a stdlib `DashboardService`, so all of its
+logic (queue, approvals, metrics) is unit-tested without a web server.
+
+```
+GET  /                          HTML dashboard
+GET  /api/metrics               ROI metrics
+GET  /api/approvals             pending approval queue
+POST /api/approvals/{id}/approve   execute the prepared action
+POST /api/approvals/{id}/reject    discard it
+GET  /api/activity              recent activity feed
+```
 
 ---
 
@@ -120,7 +147,11 @@ src/aaaas/
   hitl/interface.py    human approval channels
   memory/store.py      task state + learned vendor→account patterns
   initiative/scheduler.py  scheduled jobs + event rules (the proactive engine)
-tests/                 58 tests, runs in <1s, no network
+  dashboard/
+    service.py         stdlib service: approval queue + ROI metrics
+    web.py             FastAPI app + single-page admin UI
+tests/                 64 tests, runs in ~1s, no network
+.github/workflows/     CI: pytest on Python 3.10–3.12
 examples/              runnable demos
 docs/                  architecture & strategy
 ```

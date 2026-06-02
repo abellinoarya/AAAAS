@@ -347,7 +347,7 @@ Zero human time required for the happy path
 - [ ] Slack HITL interface
 - [ ] Long-term memory (vendor → account coding patterns)
 - [ ] Retry and error handling hardened
-- [ ] Admin dashboard (task log, HITL queue, metrics)
+- [x] Admin dashboard (task log, HITL queue, metrics) — FastAPI, `aaaas-dashboard`
 
 ### Phase 3 — Scale (Months 5–6)
 - [ ] Multi-tenant (one AAAAS deployment, N customer Odoo instances)
